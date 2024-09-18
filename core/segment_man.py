@@ -11,6 +11,10 @@ class SegmentManager:
         self.segments = {}
 
     @property
+    def sorted_segments(self):
+        return sorted(self.segments.values(), key=lambda x: x['start'])
+
+    @property
     def original_filename(self):
         return self._filename
 

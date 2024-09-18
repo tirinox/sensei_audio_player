@@ -3,3 +3,4 @@ python-dotenv
 pydub
 tqdm
 SpeechRecognition
+google-cloud-speech

@@ -5,25 +5,30 @@ from dotenv import load_dotenv
 
 from core.file_man import get_all_mp3
 from core.segment_man import SegmentManager
-from core.speech import recognize_japanese_speech, prepare_audio_for_recognition
+from core.speech import SpeechRecognition
 from core.splitter import load_audio_file, detect_pieces
 
 load_dotenv()
 
 AUDIO_SOURCE_PATH = os.environ.get('AUDIO_SOURCE_PATH')
 
+sr = SpeechRecognition()
+
 
 def fill_text_for(metadata: SegmentManager):
     audio_file = load_audio_file(metadata.original_filename)
 
-    audio_file = prepare_audio_for_recognition(audio_file)
+    # audio_file = prepare_audio_for_recognition(audio_file)
 
     lonely_segments = metadata.segments_without_text
     print(f"Processing {metadata.original_filename}, it has {len(lonely_segments)} segments without text")
 
     for key, segment in lonely_segments.items():
         start, end = segment['start'], segment['end']
-        text = recognize_japanese_speech(audio_file, start, end)
+
+        segment = audio_file[start:end]
+        text = sr.recognize(segment)
+        # text = recognize_japanese_speech(audio_file, start, end)
         print(f"Recognized: {text} for {start}..{end}")
         metadata.set_segment(start, end, text)
 

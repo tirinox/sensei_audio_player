@@ -1,2 +1,5 @@
-vk_api
 requests
+python-dotenv
+pydub
+tqdm
+SpeechRecognition

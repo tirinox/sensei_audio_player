@@ -1,19 +1,20 @@
 import json
 import os.path
 
-from code.file_man import get_all_mp3
-from code.segment_man import SegmentManager
+from core.file_man import get_all_mp3
+from core.segment_man import SegmentManager
 
 
 class AudioIndexer:
     def __init__(self, path):
         self.path = path
+        self.files = []
 
     @property
     def index_file(self):
         return os.path.join(self.path, 'index.json')
 
-    def build_index(self):
+    def scan_files(self):
         all_mp3 = get_all_mp3(self.path)
         if not all_mp3:
             print("No mp3 found! Check your path")
@@ -31,13 +32,14 @@ class AudioIndexer:
                     "n_segments": len(seg.segments),
                 })
 
-        return {
-            "dir": self.path,
-            "files": files
-        }
+        return files
 
     def rebuild_index_and_save(self):
-        index = self.build_index()
+        self.files = self.scan_files()
+        index = {
+            'path': self.path,
+            'files': self.files,
+        }
         with open(self.index_file, 'w') as f:
             json.dump(index, f, indent=4, ensure_ascii=False)
         return index
@@ -48,4 +50,14 @@ class AudioIndexer:
                 return self.rebuild_index_and_save()
 
         with open(self.index_file, 'r') as f:
-            return json.load(f)
+            index = json.load(f)
+            self.path = index['path']
+            self.files = index['files']
+
+    def __getitem__(self, item):
+        return self.files[item]
+
+    def find_by_audio_file(self, search):
+        for file in self.files:
+            if search in file['audio_file']:
+                return os.path.join(self.path, file['audio_file'])

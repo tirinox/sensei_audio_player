@@ -1,9 +1,9 @@
 import io
 
-import numpy as np
+import speech_recognition as sr
 # import whisper
 from pydub import AudioSegment
-import speech_recognition as sr
+
 
 # model = whisper.load_model("large")
 

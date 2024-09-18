@@ -7,6 +7,7 @@ from core.segment_man import SegmentManager
 from core.speech import SpeechRecognition
 from core.splitter import load_audio_file, split_file
 from core.utils import au_sep
+from core.waveform import audio_to_waveform_png
 from process_segments import fill_text_for
 
 load_dotenv()
@@ -52,5 +53,22 @@ def force_speech_recognition(query='ここはどこですか'):
     fill_text_for(metadata, audio=audio_file)
 
 
-force_speech_recognition()
+def have_fun_waveform(query='ここはどこですか'):
+    example = indexer.find_by_audio_file(query)
+    if not example:
+        print("Example not found.")
+        return
+
+    player = Player(example)
+    _, _, piece = player[5]
+
+    # audio_to_waveform_png(piece)
+    # player.play_segment(5)
+
+    audio_to_waveform_png(player.audio)
+
+
+
+have_fun_waveform()
+# force_speech_recognition()
 # force_split_and_play_in_loop(query='ここはどこですか')

@@ -23,6 +23,7 @@ class SegmentManager:
         with open(json_filename, "w") as json_file:
             json.dump({
                 "filename": self._filename,
+                "total_segments": len(self.segments),
                 "segments": self.segments,
                 "version": 2
             }, json_file, ensure_ascii=False, indent=4)

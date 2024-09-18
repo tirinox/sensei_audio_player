@@ -11,9 +11,12 @@ def detect_pieces(audio, padding=200, min_silence_len=1000, silence_thresh=-40):
     if not silences:
         silences = [[0, len(audio)]]
 
+    min_len = padding * 2
+
     # Generate a list of non-silent segments
     non_silent_segments = []
     voice_start = 0
+    silence_end = 0
     for silence_start, silence_end in silences:
         # Add padding to the non-silent segments
         silence_start = max(0, silence_start + padding)
@@ -26,7 +29,7 @@ def detect_pieces(audio, padding=200, min_silence_len=1000, silence_thresh=-40):
 
         if voice_start:
             voice_end = silence_start
-            if voice_end - voice_start > padding * 2:
+            if voice_end - voice_start > min_len:
                 non_silent_segments.append((voice_start, voice_end))
             else:
                 print(f"Skipping segment from {voice_start / 1000:.2f} to {voice_end / 1000:.2f} "
@@ -35,8 +38,11 @@ def detect_pieces(audio, padding=200, min_silence_len=1000, silence_thresh=-40):
 
     # Add the final segment if there's remaining audio after the last silence
     # todo check it>
-    # if start < len(audio):
-    #     non_silent_segments.append((start, len(audio)))
+    if silence_end < len(audio):
+        voice_start = silence_end
+        voice_end = len(audio)
+        if voice_end - voice_start > min_len:
+            non_silent_segments.append((silence_end, len(audio)))
 
     # Display the non-silent segments and let the user select one to play
     print("Non-silent segments available:")

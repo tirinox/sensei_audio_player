@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 from core.config import AUDIO_SOURCE_PATH
+from core.file_man import waveform_out_path
 from core.indexer import AudioIndexer
 from core.player import Player
 from core.segment_man import SegmentManager
@@ -60,13 +61,13 @@ def have_fun_waveform(query='ここはどこですか'):
         return
 
     player = Player(example)
-    _, _, piece = player[5]
+    index = 5
+    _, _, piece = player[index]
 
     # audio_to_waveform_png(piece)
     # player.play_segment(5)
 
-    audio_to_waveform_png(player.audio)
-
+    audio_to_waveform_png(player.audio, output_path=waveform_out_path(example, index))
 
 
 have_fun_waveform()

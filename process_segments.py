@@ -5,6 +5,7 @@ import tqdm
 from dotenv import load_dotenv
 
 from core.file_man import get_all_mp3
+from core.indexer import AudioIndexer
 from core.segment_man import SegmentManager
 from core.speech import SpeechRecognition
 from core.splitter import load_audio_file, split_file
@@ -27,11 +28,14 @@ def fill_text_for(metadata: SegmentManager, audio=None):
 
         segment = audio_file[start:end]
         text = sr.recognize(segment)
+        if text is None:
+            print(f"Failed to recognize speech for {start}..{end}")
+            continue
 
         text = text.strip()
         if not text.endswith('。') and len(text) >= 5:
             text += '。'
-    
+
         print(f"Recognized: {text} ({len(text) = }) for {start}..{end}")
         metadata.set_segment(start, end, text)
         metadata.save()
@@ -55,6 +59,9 @@ def process_all_mp3_files_to_segments(path=AUDIO_SOURCE_PATH):
     print(f"Found {len(all_mp3)} mp3 files in {path}")
     for mp3 in tqdm.tqdm(all_mp3):
         process_one_mp3_file_to_segments(mp3)
+
+    indexer = AudioIndexer(AUDIO_SOURCE_PATH)
+    indexer.rebuild_index_and_save()
 
 
 if __name__ == '__main__':

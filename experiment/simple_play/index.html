@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play MP3 Segments</title>
+</head>
+<body>
+  <h1>Play MP3 Segments from URL</h1>
+
+  <label for="mp3url">MP3 URL: </label>
+  <input type="text" id="mp3url" value="19.mp3">
+  <button onclick="downloadMP3()">Download MP3</button>
+
+  <h3>Play Segment</h3>
+  <label for="startTime">Start Time (in seconds): </label>
+  <input type="number" id="startTime" value="0" min="0">
+  <label for="endTime">End Time (in seconds): </label>
+  <input type="number" id="endTime" value="10" min="0">
+  <button onclick="playSegment()">Play Segment</button>
+
+  <audio id="audioPlayer" style="display: none"></audio>
+
+  <script>
+    let audioPlayer = document.getElementById('audioPlayer');
+    let audioBuffer = null;
+
+    // Function to download MP3 file from URL
+    async function downloadMP3() {
+      const url = document.getElementById('mp3url').value;
+
+      try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        console.log("MP3 downloaded and decoded successfully.");
+        alert("MP3 file downloaded successfully.");
+      } catch (error) {
+        console.error("Error downloading MP3 file:", error);
+        alert("Failed to download the MP3 file.");
+      }
+    }
+
+    // Function to play a segment of the MP3
+    async function playSegment() {
+      if (!audioBuffer) {
+        alert("Please download the MP3 first.");
+        return;
+      }
+
+      const startTime = parseFloat(document.getElementById('startTime').value);
+      const endTime = parseFloat(document.getElementById('endTime').value);
+
+      if (endTime <= startTime || endTime > audioBuffer.duration) {
+        alert("Invalid time range.");
+        return;
+      }
+
+      // Stop any currently playing audio
+      if (audioPlayer.src) {
+        audioPlayer.pause();
+      }
+
+      // Create a new audio context and buffer source
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+
+      // Connect the buffer source to the audio context's destination (the speakers)
+      source.connect(audioContext.destination);
+
+      // Start playing at the specified start time
+      source.start(0, startTime, endTime - startTime);
+
+      // Handle cleanup when finished playing
+      source.onended = function () {
+        audioContext.close();
+      };
+
+      console.log(`Playing segment from ${startTime} to ${endTime} seconds.`);
+    }
+  </script>
+</body>
+</html>

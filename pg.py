@@ -70,6 +70,8 @@ def have_fun_waveform(query='ここはどこですか'):
     audio_to_waveform_png(player.audio, output_path=waveform_out_path(example, index))
 
 
-have_fun_waveform()
-# force_speech_recognition()
-# force_split_and_play_in_loop(query='ここはどこですか')
+# indexer.rebuild_index_and_save()
+
+# have_fun_waveform()
+force_speech_recognition(query='koko')
+# force_split_and_play_in_loop(query='koko')

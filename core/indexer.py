@@ -36,13 +36,15 @@ class AudioIndexer:
 
     def rebuild_index_and_save(self):
         self.files = self.scan_files()
+        self.save()
+
+    def save(self):
         index = {
             'path': self.path,
             'files': self.files,
         }
         with open(self.index_file, 'w') as f:
             json.dump(index, f, indent=4, ensure_ascii=False)
-        return index
 
     def load_index(self, allow_rebuild=False):
         if not os.path.exists(self.index_file):
@@ -61,3 +63,7 @@ class AudioIndexer:
         for file in self.files:
             if search in file['audio_file']:
                 return os.path.join(self.path, file['audio_file'])
+
+    def sort_files(self):
+        self.files.sort(key=lambda x: x['audio_file'])
+        return self.files

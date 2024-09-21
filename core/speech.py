@@ -2,13 +2,11 @@ import io
 import os
 from urllib.error import URLError
 
+import numpy as np
 import speech_recognition as sr
-# import whisper
 from pydub import AudioSegment
 from speech_recognition import AudioData, RequestError, UnknownValueError
-
-
-# model = whisper.load_model("large")
+import whisper
 
 
 def prepare_audio_for_recognition(audio):
@@ -21,21 +19,25 @@ def prepare_audio_for_recognition(audio):
     return audio
 
 
-## Old whisper code
-# def _recognize_japanese_speech_whisper(audio, start_time, end_time):
-#     # Extract the segment (pydub works in milliseconds)
-#     segment = audio[start_time:end_time]
-#
-#     arr = np.array(segment.get_array_of_samples())
-#     arr = arr.astype(np.float32) / 32768.0
-#
-#     result = model.transcribe(arr, language="ja")
-#
-#     # Return the recognized text
-#     return result["text"]
+class SpeechRecognitionWhisper:
+    def __init__(self):
+        self.model = whisper.load_model("large")
+
+    # Old whisper code
+    def recognize_japanese_speech_whisper(self, audio):
+        # Prepare the audio for recognition
+        audio = prepare_audio_for_recognition(audio)
+
+        arr = np.array(audio.get_array_of_samples())
+        arr = arr.astype(np.float32) / 32768.0
+
+        result = self.model.transcribe(arr, language="ja")
+
+        # Return the recognized text
+        return result["text"]
 
 
-class SpeechRecognition:
+class SpeechRecognitionGoogle:
     def __init__(self, language="ja-JP"):
         self.recognizer = MyRecognizer()
         self.language = language

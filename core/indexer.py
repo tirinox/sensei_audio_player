@@ -25,18 +25,20 @@ class AudioIndexer:
         for mp3_file in all_mp3:
             seg = SegmentManager(mp3_file)
             if seg.load():
-                mp3_file_name = os.path.basename(mp3_file)
+                just_filename = os.path.basename(mp3_file)
                 files.append({
-                    "audio_file": mp3_file_name,
-                    "segment_file": seg.segments_filename(mp3_file_name),
+                    "audio_file": just_filename,
+                    "segment_file": seg.segments_filename(just_filename),
                     "n_segments": len(seg.segments),
                     "length": len(seg.audio) / 1000,
+                    "title": just_filename,
                 })
 
         return files
 
     def rebuild_index_and_save(self):
         self.files = self.scan_files()
+        # todo: preserve title if it's already in the index
         self.save()
 
     def save(self):

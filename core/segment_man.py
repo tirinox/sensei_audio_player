@@ -12,6 +12,8 @@ class SegmentManager:
     def __init__(self, filename):
         self._filename = filename
         self.segments = {}
+        self.title = os.path.basename(filename)
+        self.length = 0
 
     @property
     def audio(self):
@@ -30,8 +32,10 @@ class SegmentManager:
         with open(json_filename, "w") as json_file:
             json.dump({
                 "filename": os.path.basename(self._filename),
+                "title": self.title or os.path.basename(self._filename),
                 "total_segments": len(self.segments),
                 "segments": self.segments,
+                "length": self.length or len(self.audio) / 1000,
                 "version": 2
             }, json_file, ensure_ascii=False, indent=4)
         print(f"Non-silent segments saved to {json_filename}")
@@ -47,7 +51,7 @@ class SegmentManager:
                     raise ValueError(f"Unsupported version: {version}")
 
                 self.segments = data['segments']
-                self._filename = data['filename']
+
             print(f"Non-silent segments loaded from {json_filename}")
             return True
         except FileNotFoundError:

@@ -11,7 +11,7 @@ from core.segment_man import SegmentManager
 from core.splitter import load_audio_file, split_file
 from core.utils import au_sep
 from core.waveform import audio_to_waveform_png
-from process_segments import fill_text_for
+from core.process_segments import fill_text_for
 
 load_dotenv()
 
@@ -43,7 +43,16 @@ def force_split_and_play_in_loop(query='相撲'):
 
 
 def force_speech_recognition():
-    example = sys.argv[2]
+    example = sys.argv[2].strip()
+
+    if example.isdigit():
+        print("Example is a number. Trying to find file by index.")
+        example = int(example)
+        files = get_all_mp3(AUDIO_SOURCE_PATH)
+        example = files[example - 1]
+    if os.path.dirname(example) == '':
+        print("Example is a filename. Trying to find it in the database path.")
+        example = os.path.join(AUDIO_SOURCE_PATH, example)
 
     audio_file = load_audio_file(example)
     metadata = SegmentManager(example)
@@ -91,12 +100,20 @@ def process_incoming():
             os.system(f'ffmpeg -i "{file}" -b:a 128k "{os.path.join(main_db_path, basename)}"')
 
 
+def list_files():
+    main_db_path = AUDIO_SOURCE_PATH
+    files = get_all_mp3(main_db_path)
+    for i, file in enumerate(files):
+        print(f'{i + 1}. {os.path.basename(file)}')
+
+
 command_map = {
     'reindex': reindex,
     'waveform': have_fun_waveform,
     'update': force_speech_recognition,
     'split': force_split_and_play_in_loop,
     'process_incoming': process_incoming,
+    'list': list_files,
 }
 
 if __name__ == '__main__':

@@ -1,11 +1,13 @@
+import os.path
+import sys
+
 from dotenv import load_dotenv
 
 from core.config import AUDIO_SOURCE_PATH
-from core.file_man import waveform_out_path
+from core.file_man import waveform_out_path, get_all_mp3
 from core.indexer import AudioIndexer
 from core.player import Player
 from core.segment_man import SegmentManager
-from core.speech import SpeechRecognition
 from core.splitter import load_audio_file, split_file
 from core.utils import au_sep
 from core.waveform import audio_to_waveform_png
@@ -14,7 +16,10 @@ from process_segments import fill_text_for
 load_dotenv()
 
 indexer = AudioIndexer(AUDIO_SOURCE_PATH)
-indexer.load_index()
+try:
+    indexer.load_index()
+except FileNotFoundError:
+    print("Index file not found.")
 
 
 def force_split_and_play_in_loop(query='相撲'):
@@ -37,12 +42,8 @@ def force_split_and_play_in_loop(query='相撲'):
         player.shift(1)
 
 
-def force_speech_recognition(query='ここはどこですか'):
-    # example = indexer.find_by_audio_file('相撲')
-    example = indexer.find_by_audio_file(query)
-    if not example:
-        print("Example not found.")
-        return
+def force_speech_recognition():
+    example = sys.argv[2]
 
     audio_file = load_audio_file(example)
     metadata = SegmentManager(example)
@@ -70,11 +71,43 @@ def have_fun_waveform(query='ここはどこですか'):
     audio_to_waveform_png(player.audio, output_path=waveform_out_path(example, index))
 
 
-if __name__ == '__main__':
+def reindex():
+    indexer.rebuild_index_and_save()
     indexer.sort_files()
     indexer.save()
-    # indexer.rebuild_index_and_save()
 
-    # have_fun_waveform()
-    # force_speech_recognition(query='koko')
-    # force_split_and_play_in_loop(query='koko')
+
+def process_incoming():
+    main_db_path = AUDIO_SOURCE_PATH
+    files = get_all_mp3(main_db_path)
+    for file in files:
+        basename = os.path.basename(file)
+        if not basename.startswith('lb'):
+            print(f'Found new file: {basename}')
+            basename = basename.replace('-kissvk.com', '')
+            basename = basename.replace('My Recording-', '')
+            basename = f'lb_{basename}'
+            print(f'New name: {basename}')
+            os.system(f'ffmpeg -i "{file}" -b:a 128k "{os.path.join(main_db_path, basename)}"')
+
+
+command_map = {
+    'reindex': reindex,
+    'waveform': have_fun_waveform,
+    'update': force_speech_recognition,
+    'split': force_split_and_play_in_loop,
+    'process_incoming': process_incoming,
+}
+
+if __name__ == '__main__':
+    command = sys.argv[1] if len(sys.argv) > 1 else None
+    if not command:
+        print("No command provided. Available commands: ", list(command_map.keys()))
+        sys.exit(1)
+
+    command = command.strip().lower()
+    if command in command_map:
+        print("Running command:", command)
+        command_map[command]()
+    else:
+        print("Unknown command. Available commands: ", list(command_map.keys()))

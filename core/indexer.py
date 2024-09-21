@@ -30,6 +30,7 @@ class AudioIndexer:
                     "audio_file": mp3_file_name,
                     "segment_file": seg.segments_filename(mp3_file_name),
                     "n_segments": len(seg.segments),
+                    "length": len(seg.audio) / 1000,
                 })
 
         return files

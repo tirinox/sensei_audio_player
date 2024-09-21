@@ -1,4 +1,7 @@
 import json
+import os.path
+
+from core.splitter import load_audio_file
 
 
 class SegmentManager:
@@ -9,6 +12,10 @@ class SegmentManager:
     def __init__(self, filename):
         self._filename = filename
         self.segments = {}
+
+    @property
+    def audio(self):
+        return load_audio_file(self._filename)
 
     @property
     def sorted_segments(self):
@@ -22,7 +29,7 @@ class SegmentManager:
         json_filename = self.segments_filename(self._filename)
         with open(json_filename, "w") as json_file:
             json.dump({
-                "filename": self._filename,
+                "filename": os.path.basename(self._filename),
                 "total_segments": len(self.segments),
                 "segments": self.segments,
                 "version": 2

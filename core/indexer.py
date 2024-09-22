@@ -37,8 +37,18 @@ class AudioIndexer:
         return files
 
     def rebuild_index_and_save(self):
+        old_titles = {}
+        for mp3_file in self.files:
+            if 'title' in mp3_file:
+                old_titles[mp3_file['audio_file']] = mp3_file['title']
+
         self.files = self.scan_files()
-        # todo: preserve title if it's already in the index
+
+        for mp3_file in self.files:
+            if mp3_file['audio_file'] in old_titles:
+                print(f"Restoring title for {mp3_file['audio_file']}")
+                mp3_file['title'] = old_titles[mp3_file['audio_file']]
+
         self.save()
 
     def save(self):

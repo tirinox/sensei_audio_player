@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from core.config import AUDIO_SOURCE_PATH
 from core.file_man import waveform_out_path, get_all_mp3
+from core.furigana import add_furigana, parentheses_to_ruby
 from core.indexer import AudioIndexer
 from core.player import Player
 from core.segment_man import SegmentManager
@@ -107,6 +108,21 @@ def list_files():
         print(f'{i + 1}. {os.path.basename(file)}')
 
 
+def foo_func():
+    f = indexer.files[0]
+    print(f)
+    seg_manager = SegmentManager(os.path.join(AUDIO_SOURCE_PATH, f['audio_file']))
+    seg_manager.load()
+    for seg in seg_manager.sorted_segments:
+        text = seg['text']
+        furi_text = add_furigana(text)
+        print('-------')
+        print(text)
+        print(furi_text)
+        html = parentheses_to_ruby(furi_text)
+        print(html)
+
+
 command_map = {
     'reindex': reindex,
     'waveform': have_fun_waveform,
@@ -114,6 +130,7 @@ command_map = {
     'split': force_split_and_play_in_loop,
     'process_incoming': process_incoming,
     'list': list_files,
+    'foo': foo_func,
 }
 
 if __name__ == '__main__':

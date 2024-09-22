@@ -5,3 +5,5 @@ tqdm
 SpeechRecognition
 google-cloud-speech
 Pillow
+mecab-python3
+jaconv

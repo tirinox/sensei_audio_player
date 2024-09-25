@@ -2,6 +2,7 @@ import re
 
 import MeCab
 import jaconv
+import pykakasi
 
 
 def add_furigana(sentence):
@@ -42,3 +43,50 @@ def parentheses_to_ruby(text):
 
     # Substitute all occurrences in the text
     return parentheses_to_ruby_pattern.sub(repl, text)
+
+
+def parentheses_to_ruby_v2(text):
+    """
+    Converts text in [original](translated) format to HTML ruby tags.
+
+    Args:
+        text (str): The input text containing [original](translated) patterns.
+
+    Returns:
+        str: The text with [original](translated) replaced by HTML ruby tags.
+    """
+    # Regular expression pattern to match [original](translated)
+    pattern = re.compile(r'\[([^\]]+)\]\(([^)]+)\)')
+
+    # Replacement function
+    def repl(match):
+        original = match.group(1)
+        translated = match.group(2)
+        return f'<ruby>{original}<rt>{translated}</rt></ruby>'
+
+    # Substitute all occurrences in the text
+    new_text = pattern.sub(repl, text)
+    return new_text
+
+def add_furigana_v2(text):
+    # Initialize pykakasi converter
+    kks = pykakasi.kakasi()
+
+    # Regular expression pattern to match kanji and numbers but skip katakana
+    # Kanji Unicode range: \u4E00-\u9FFF
+    # Numbers: ASCII 0-9 and full-width numbers \uFF10-\uFF19
+    pattern = re.compile(r'[\u4E00-\u9FFF\uFF10-\uFF19\u0030-\u0039]+')
+
+    # Function to replace matched kanji and numbers with their readings
+    def replace_match(match):
+        original = match.group()
+        # Use pykakasi to get the reading
+        result = kks.convert(original)
+        # Concatenate readings
+        readings = ''.join([item['hira'] for item in result])
+        # Return the formatted string
+        return f'[{original}]({readings})'
+
+    # Replace all occurrences in the text
+    new_text = pattern.sub(replace_match, text)
+    return new_text

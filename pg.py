@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 from core.config import AUDIO_SOURCE_PATH
 from core.file_man import waveform_out_path, get_all_mp3
-from core.furigana import add_furigana, parentheses_to_ruby
+from core.furigana import add_furigana_v2, parentheses_to_ruby_v2
 from core.indexer import AudioIndexer
 from core.player import Player
+from core.process_segments import fill_text_for
 from core.segment_man import SegmentManager
 from core.splitter import load_audio_file, split_file
 from core.utils import au_sep
 from core.waveform import audio_to_waveform_png
-from core.process_segments import fill_text_for
 
 load_dotenv()
 
@@ -24,8 +24,8 @@ except FileNotFoundError:
 
 
 def force_split_and_play_in_loop(query='相撲'):
-    example = indexer.find_by_audio_file(query)
-    print(example)
+    example = get_example()
+    print("Processing example:", example)
 
     player = Player(example)
 
@@ -43,7 +43,7 @@ def force_split_and_play_in_loop(query='相撲'):
         player.shift(1)
 
 
-def force_speech_recognition():
+def get_example():
     example = sys.argv[2].strip()
 
     if example.isdigit():
@@ -54,6 +54,12 @@ def force_speech_recognition():
     if os.path.dirname(example) == '':
         print("Example is a filename. Trying to find it in the database path.")
         example = os.path.join(AUDIO_SOURCE_PATH, example)
+    return example
+
+
+def force_speech_recognition():
+    example = get_example()
+    print("Processing example:", example)
 
     audio_file = load_audio_file(example)
     metadata = SegmentManager(example)
@@ -109,17 +115,17 @@ def list_files():
 
 
 def foo_func():
-    f = indexer.files[0]
+    f = indexer.files[4]
     print(f)
     seg_manager = SegmentManager(os.path.join(AUDIO_SOURCE_PATH, f['audio_file']))
     seg_manager.load()
     for seg in seg_manager.sorted_segments:
         text = seg['text']
-        furi_text = add_furigana(text)
+        furi_text = add_furigana_v2(text)
         print('-------')
         print(text)
         print(furi_text)
-        html = parentheses_to_ruby(furi_text)
+        html = parentheses_to_ruby_v2(furi_text)
         print(html)
 
 

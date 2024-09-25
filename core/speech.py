@@ -24,7 +24,7 @@ class SpeechRecognitionWhisper:
         self.model = whisper.load_model("large")
 
     # Old whisper code
-    def recognize_japanese_speech_whisper(self, audio):
+    def recognize(self, audio):
         # Prepare the audio for recognition
         audio = prepare_audio_for_recognition(audio)
 

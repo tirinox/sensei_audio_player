@@ -44,16 +44,20 @@ class SegmentManager:
         json_filename = self.segments_filename(self._filename)
         self.segments = {}
         try:
-            with open(json_filename, "r") as json_file:
-                data = json.load(json_file)
-                version = data.get('version', 1)
-                if version != 2:
-                    raise ValueError(f"Unsupported version: {version}")
+            try:
+                with open(json_filename, "r") as json_file:
+                    data = json.load(json_file)
+                    version = data.get('version', 1)
+                    if version != 2:
+                        raise ValueError(f"Unsupported version: {version}")
 
-                self.segments = data['segments']
+                    self.segments = data['segments']
 
-            print(f"Non-silent segments loaded from {json_filename}")
-            return True
+                print(f"Non-silent segments loaded from {json_filename}")
+                return True
+            except json.JSONDecodeError:
+                print(f"Failed to load JSON file: {json_filename}")
+                return False
         except FileNotFoundError:
             print(f"Non-silent segments JSON file not found: {json_filename}")
             return False
@@ -75,3 +79,6 @@ class SegmentManager:
     @property
     def segments_without_text(self):
         return {k: v for k, v in self.segments.items() if not v['text']}
+
+    def clear(self):
+        self.segments.clear()

@@ -3,14 +3,15 @@ import os
 from dotenv import load_dotenv
 
 from core.segment_man import SegmentManager
-from core.speech import SpeechRecognitionGoogle
+from core.speech import SpeechRecognitionWhisper
 from core.splitter import load_audio_file
 
 load_dotenv()
 
 AUDIO_SOURCE_PATH = os.environ.get('AUDIO_SOURCE_PATH')
 
-sr = SpeechRecognitionGoogle()
+# sr = SpeechRecognitionGoogle()
+sr = SpeechRecognitionWhisper()
 
 
 def fill_text_for(metadata: SegmentManager, audio=None):
@@ -29,7 +30,10 @@ def fill_text_for(metadata: SegmentManager, audio=None):
             continue
 
         text = text.strip()
-        if not text.endswith('。') and not text.endswith('？') and len(text) >= 5:
+
+        text = text.replace('か?', 'か。')
+
+        if not text.endswith('。') and not text.endswith('？') and not text.endswith('?') and len(text) >= 5:
             text += '。'
 
         print(f"Recognized: {text} ({len(text) = }) for {start}..{end}")

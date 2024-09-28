@@ -129,6 +129,17 @@ def foo_func():
         print(html)
 
 
+def convert_ruby():
+    example = get_example()
+    print("Processing example:", example)
+    metadata = SegmentManager(example)
+    metadata.load()
+    metadata.convert_ruby_to_parenthesis()
+    print("Converted to parenthesis")
+    input("Press Enter to continue...")
+    metadata.save()
+
+
 command_map = {
     'reindex': reindex,
     'waveform': have_fun_waveform,
@@ -137,6 +148,7 @@ command_map = {
     'process_incoming': process_incoming,
     'list': list_files,
     'foo': foo_func,
+    'convert_ruby': convert_ruby,
 }
 
 if __name__ == '__main__':

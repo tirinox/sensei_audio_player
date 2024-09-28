@@ -68,6 +68,7 @@ def parentheses_to_ruby_v2(text):
     new_text = pattern.sub(repl, text)
     return new_text
 
+
 def add_furigana_v2(text):
     # Initialize pykakasi converter
     kks = pykakasi.kakasi()
@@ -90,3 +91,20 @@ def add_furigana_v2(text):
     # Replace all occurrences in the text
     new_text = pattern.sub(replace_match, text)
     return new_text
+
+
+def convert_ruby_to_parenthesis(html_string):
+    # Regular expression to match ruby structure
+    ruby_pattern = re.compile(r'<ruby>(.*?)<rt>(.*?)</rt></ruby>')
+
+    # Function to replace ruby tags with the desired format
+    def replace_ruby(match):
+        kanji = match.group(1)
+        reading = match.group(2)
+        return f'[{kanji}]({reading})'
+
+    # Substitute the ruby pattern with the formatted string
+    result = ruby_pattern.sub(replace_ruby, html_string)
+
+    # Return the converted string
+    return result

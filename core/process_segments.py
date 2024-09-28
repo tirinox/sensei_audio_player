@@ -10,11 +10,17 @@ load_dotenv()
 
 AUDIO_SOURCE_PATH = os.environ.get('AUDIO_SOURCE_PATH')
 
-# sr = SpeechRecognitionGoogle()
-sr = SpeechRecognitionWhisper()
+g_sr = None
 
 
-def fill_text_for(metadata: SegmentManager, audio=None):
+def fill_text_for(metadata: SegmentManager, audio=None, sr=None):
+    global g_sr
+    if not sr:
+        if not g_sr:
+            g_sr = SpeechRecognitionWhisper()
+            # g_sr = SpeechRecognitionGoogle()
+        sr = g_sr
+
     audio_file = audio or load_audio_file(metadata.original_filename)
 
     lonely_segments = metadata.segments_without_text

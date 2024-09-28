@@ -1,6 +1,7 @@
 import json
 import os.path
 
+from core.furigana import convert_ruby_to_parenthesis
 from core.splitter import load_audio_file
 
 
@@ -82,3 +83,9 @@ class SegmentManager:
 
     def clear(self):
         self.segments.clear()
+
+    def convert_ruby_to_parenthesis(self):
+        for k, v in self.segments.items():
+            text = v['text']
+            v['text'] = convert_ruby_to_parenthesis(text)
+            print(f"Converted '{text}' to '{v['text']}'")

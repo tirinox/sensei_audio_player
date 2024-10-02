@@ -1,6 +1,7 @@
 import os.path
 import sys
 
+import tqdm
 from dotenv import load_dotenv
 
 from core.config import AUDIO_SOURCE_PATH
@@ -57,18 +58,18 @@ def get_example():
     return example
 
 
-def force_speech_recognition():
-    example = get_example()
+def force_speech_recognition(example=None, skip_existing_text=True):
+    example = example or get_example()
     print("Processing example:", example)
 
     audio_file = load_audio_file(example)
     metadata = SegmentManager(example)
-    # if True:
+
     if not metadata.load():
         split_file(audio_file, metadata)
         metadata.save()
 
-    fill_text_for(metadata, audio=audio_file)
+    fill_text_for(metadata, audio=audio_file, skip_existing=skip_existing_text)
 
 
 def have_fun_waveform(query='ここはどこですか'):
@@ -93,18 +94,35 @@ def reindex():
     indexer.save()
 
 
-def process_incoming():
+def process_incoming(only_new=False):
     main_db_path = AUDIO_SOURCE_PATH
-    files = get_all_mp3(main_db_path)
-    for file in files:
+    all_files = get_all_mp3(main_db_path)
+
+    new_files = []
+
+    # renaming and converting
+    for file in tqdm.tqdm(all_files):
         basename = os.path.basename(file)
         if not basename.startswith('lb'):
             print(f'Found new file: {basename}')
             basename = basename.replace('-kissvk.com', '')
             basename = basename.replace('My Recording-', '')
+            basename = basename.replace('Неизвестный-', '')
             basename = f'lb_{basename}'
             print(f'New name: {basename}')
-            os.system(f'ffmpeg -i "{file}" -b:a 128k "{os.path.join(main_db_path, basename)}"')
+            new_full_name = os.path.join(main_db_path, basename)
+            os.system(f'ffmpeg -i "{file}" -b:a 128k "{new_full_name}"')
+            new_files.append(new_full_name)
+            os.remove(file)
+
+    reindex()
+
+    # processing
+    realm = new_files if only_new else all_files
+    for file in tqdm.tqdm(realm):
+        force_speech_recognition(file, skip_existing_text=True)
+
+    reindex()
 
 
 def list_files():
@@ -156,6 +174,8 @@ if __name__ == '__main__':
     if not command:
         print("No command provided. Available commands: ", list(command_map.keys()))
         sys.exit(1)
+
+    print(f'{AUDIO_SOURCE_PATH = }')
 
     command = command.strip().lower()
     if command in command_map:

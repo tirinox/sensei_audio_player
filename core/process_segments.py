@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 from core.segment_man import SegmentManager
 from core.speech import SpeechRecognitionWhisper
@@ -13,7 +14,7 @@ AUDIO_SOURCE_PATH = os.environ.get('AUDIO_SOURCE_PATH')
 g_sr = None
 
 
-def fill_text_for(metadata: SegmentManager, audio=None, sr=None):
+def fill_text_for(metadata: SegmentManager, audio=None, sr=None, skip_existing=True):
     global g_sr
     if not sr:
         if not g_sr:
@@ -26,8 +27,12 @@ def fill_text_for(metadata: SegmentManager, audio=None, sr=None):
     lonely_segments = metadata.segments_without_text
     print(f"Processing {metadata.original_filename}, it has {len(lonely_segments)} segments without text")
 
-    for key, segment in lonely_segments.items():
+    for key, segment in tqdm(lonely_segments.items()):
         start, end = segment['start'], segment['end']
+
+        if segment.get('text') and skip_existing:
+            print(f"Skipping existing segment {start}..{end}")
+            continue
 
         segment = audio_file[start:end]
         text = sr.recognize(segment)

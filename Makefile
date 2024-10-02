@@ -12,8 +12,8 @@ reindex: # Reindex the database.
 list: # List all the tables in the database.
 	python pg.py list
 
-.PHONY: process_incoming
-process_incoming: # Process incoming messages.
+.PHONY: process-incoming
+process-incoming: # Process incoming messages.
 	python pg.py process_incoming
 
 .PHONY: upload

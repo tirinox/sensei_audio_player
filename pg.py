@@ -117,6 +117,9 @@ def process_incoming(only_new=False):
 
     reindex()
 
+    # load again
+    all_files = get_all_mp3(main_db_path)
+
     # processing
     realm = new_files if only_new else all_files
     for file in tqdm.tqdm(realm):
